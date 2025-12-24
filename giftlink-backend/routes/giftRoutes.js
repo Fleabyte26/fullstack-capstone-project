@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const connectToDatabase = require('../models/db');  // Adjust path if needed
+const connectToDatabase = require('../models/db');
 
 // Get all gifts
 router.get('/', async (req, res) => {
@@ -22,7 +22,7 @@ router.get('/', async (req, res) => {
     }
 });
 
-// Get a specific gift by ID
+// Get a specific gift by ID (Step 3 - completed as per lab instructions)
 router.get('/:id', async (req, res) => {
     try {
         // Task 1: Connect to MongoDB and store connection to db constant
@@ -33,10 +33,8 @@ router.get('/:id', async (req, res) => {
 
         const id = req.params.id;
 
-        // Task 3: Find a specific gift by ID using findOne
-        // Note: We need to convert the string ID to ObjectId
-        const { ObjectId } = require('mongodb');
-        const gift = await collection.findOne({ _id: new ObjectId(id) });
+        // Task 3: Find a specific gift by ID using findOne on the 'id' field (string)
+        const gift = await collection.findOne({ id: id });
 
         if (!gift) {
             return res.status(404).send('Gift not found');
@@ -49,15 +47,13 @@ router.get('/:id', async (req, res) => {
     }
 });
 
-// Add a new gift (already provided in template)
+// Add a new gift (already provided in template - slightly improved for clarity)
 router.post('/', async (req, res, next) => {
     try {
         const db = await connectToDatabase();
         const collection = db.collection("gifts");
         const result = await collection.insertOne(req.body);
 
-        // insertOne returns insertedId and acknowledged; the inserted document is in result
-        // To return the full inserted gift (with _id), we can either use req.body + _id or find it again
         const insertedGift = { ...req.body, _id: result.insertedId };
         res.status(201).json(insertedGift);
     } catch (e) {
