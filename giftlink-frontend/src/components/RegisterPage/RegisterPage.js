@@ -1,99 +1,101 @@
-import React, { useState } from 'react';
-import './RegisterPage.css';
+// Task 1: Import urlConfig from `giftlink-frontend/src/config.js`
+import { urlConfig } from '../../config';
 
-function RegisterPage() {
-    // State variables
-    const [firstName, setFirstName] = useState('');
-    const [lastName, setLastName] = useState('');
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
+// Task 2: Import useAppContext `giftlink-frontend/context/AuthContext.js`
+import { useAppContext } from '../../context/AuthContext';
 
-    // Handle register button click
-    const handleRegister = async () => {
-        console.log("Register invoked");
-        console.log({
-            firstName,
-            lastName,
-            email,
-            password
-        });
-    };
+// Task 3: Import useNavigate from `react-router-dom` to handle navigation after successful registration.
+import { useNavigate } from 'react-router-dom';
 
-    return (
-        <div className="container mt-5">
-            <div className="row justify-content-center">
-                <div className="col-md-6 col-lg-4">
-                    <div className="register-card p-4 border rounded">
-                        <h2 className="text-center mb-4 font-weight-bold">Register</h2>
+import { useState } from 'react';
 
-                        {/* First Name */}
-                        <div className="mb-4">
-                            <label htmlFor="firstName" className="form-label">First Name</label>
-                            <input
-                                id="firstName"
-                                type="text"
-                                className="form-control"
-                                placeholder="Enter your first name"
-                                value={firstName}
-                                onChange={(e) => setFirstName(e.target.value)}
-                            />
-                        </div>
+export default function RegisterPage() {
+  // useState for form fields
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
 
-                        {/* Last Name */}
-                        <div className="mb-4">
-                            <label htmlFor="lastName" className="form-label">Last Name</label>
-                            <input
-                                id="lastName"
-                                type="text"
-                                className="form-control"
-                                placeholder="Enter your last name"
-                                value={lastName}
-                                onChange={(e) => setLastName(e.target.value)}
-                            />
-                        </div>
+  // Task 4: Include a state for error message
+  const [showerr, setShowerr] = useState('');
 
-                        {/* Email */}
-                        <div className="mb-4">
-                            <label htmlFor="email" className="form-label">Email</label>
-                            <input
-                                id="email"
-                                type="email"
-                                className="form-control"
-                                placeholder="Enter your email"
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
-                            />
-                        </div>
+  // Task 5: Create a local variable for `navigate` and `setIsLoggedIn`
+  const navigate = useNavigate();
+  const { setIsLoggedIn } = useAppContext();
 
-                        {/* Password */}
-                        <div className="mb-4">
-                            <label htmlFor="password" className="form-label">Password</label>
-                            <input
-                                id="password"
-                                type="password"
-                                className="form-control"
-                                placeholder="Enter your password"
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                            />
-                        </div>
+  const handleRegister = async (e) => {
+    e.preventDefault();
+    setShowerr(''); // reset error
 
-                        {/* Register Button */}
-                        <button
-                            className="btn btn-primary w-100 mb-3"
-                            onClick={handleRegister}
-                        >
-                            Register
-                        </button>
+    try {
+      // Step 1: API call to backend
+      const response = await fetch(`${urlConfig.backendUrl}/api/auth/register`, {
+        method: 'POST', // Task 6: POST method
+        headers: {      // Task 7: headers
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ // Task 8: body with user details
+          firstName,
+          lastName,
+          email,
+          password,
+        }),
+      });
 
-                        <p className="mt-4 text-center">
-                            Already a member? <a href="/app/login" className="text-primary">Login</a>
-                        </p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    );
+      // Task 1 (Step 2): Access JSON data from backend
+      const json = await response.json();
+
+      if (response.ok && json.authtoken) {
+        // Task 2: Set user details in session storage
+        sessionStorage.setItem('auth-token', json.authtoken);
+        sessionStorage.setItem('name', firstName);
+        sessionStorage.setItem('email', json.email);
+
+        // Task 3: Set the state of user to logged in
+        setIsLoggedIn(true);
+
+        // Task 4: Navigate to MainPage after login
+        navigate('/app');
+      } else {
+        // Task 5: Set error message if registration fails
+        setShowerr(json.error || 'Registration failed. Please try again.');
+      }
+    } catch (e) {
+      // Task 6: Display error message to end user
+      setShowerr('Network error. Please try again.');
+      console.error('Error fetching details: ' + e.message);
+    }
+  };
+
+  return (
+    <form onSubmit={handleRegister}>
+      <input
+        type="text"
+        placeholder="First Name"
+        value={firstName}
+        onChange={(e) => setFirstName(e.target.value)}
+      />
+      <input
+        type="text"
+        placeholder="Last Name"
+        value={lastName}
+        onChange={(e) => setLastName(e.target.value)}
+      />
+      <input
+        type="email"
+        placeholder="Email"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+      />
+      <input
+        type="password"
+        placeholder="Password"
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
+      />
+      {/* Task 6: Display error message */}
+      {showerr && <div className="text-danger">{showerr}</div>}
+      <button type="submit">Register</button>
+    </form>
+  );
 }
-
-export default RegisterPage;
