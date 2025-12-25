@@ -9,6 +9,7 @@ import LoginPage from './components/LoginPage/LoginPage';
 import RegisterPage from './components/RegisterPage/RegisterPage';
 import DetailsPage from './components/DetailsPage/DetailsPage';
 import SearchPage from './components/SearchPage/SearchPage'; // ✅ NEW
+import Profile from './components/Profile/Profile'; // ✅ NEW
 
 function App() {
   return (
@@ -28,6 +29,9 @@ function App() {
 
         {/* Product Details Page */}
         <Route path="/app/product/:productId" element={<DetailsPage />} />
+
+        {/* Profile Page */}
+        <Route path="/app/profile" element={<Profile />} /> {/* ✅ NEW */}
       </Routes>
     </>
   );

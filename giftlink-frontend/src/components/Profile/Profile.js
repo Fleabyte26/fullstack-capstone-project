@@ -1,133 +1,85 @@
-import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import './Profile.css'
-import {urlConfig} from '../../config';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAppContext } from '../../context/AuthContext';
+import { urlConfig } from '../../config';
 
-const Profile = () => {
-  const [userDetails, setUserDetails] = useState({});
- const [updatedDetails, setUpdatedDetails] = useState({});
- const {setUserName} = useAppContext();
- const [changed, setChanged] = useState("");
-
- const [editMode, setEditMode] = useState(false);
+export default function Profile() {
+  const { userName, setUserName } = useAppContext();
+  const [editMode, setEditMode] = useState(false);
+  const [nameInput, setNameInput] = useState(userName || '');
+  const [changed, setChanged] = useState('');
   const navigate = useNavigate();
+
   useEffect(() => {
-    const authtoken = sessionStorage.getItem("auth-token");
-    if (!authtoken) {
-      navigate("/app/login");
-    } else {
-      fetchUserProfile();
+    const token = sessionStorage.getItem('auth-token');
+    if (!token) {
+      navigate('/app/login');
     }
   }, [navigate]);
 
-  const fetchUserProfile = async () => {
+  const handleSubmit = async () => {
+    const authtoken = sessionStorage.getItem('auth-token');
+    const email = sessionStorage.getItem('email');
+    const payload = { name: nameInput };
+
     try {
-      const authtoken = sessionStorage.getItem("auth-token");
-      const email = sessionStorage.getItem("email");
-      const name=sessionStorage.getItem('name');
-      if (name || authtoken) {
-                const storedUserDetails = {
-                  name: name,
-                  email:email
-                };
+      const response = await fetch(`${urlConfig.backendUrl}/api/auth/update`, {
+        // Task 1: set method
+        method: 'PUT',
+        // Task 2: set headers
+        headers: {
+          "Authorization": `Bearer ${authtoken}`,
+          "Content-Type": "application/json",
+          "Email": email,
+        },
+        // Task 3: set body
+        body: JSON.stringify(payload),
+      });
 
-                setUserDetails(storedUserDetails);
-                setUpdatedDetails(storedUserDetails);
-              }
-} catch (error) {
-  console.error(error);
-  // Handle error case
+      if (response.ok) {
+        const updatedDetails = await response.json();
+        // Task 4: set the new name in AppContext
+        setUserName(nameInput);
+        // Task 5: set user name in session
+        sessionStorage.setItem("name", nameInput);
+        setChanged("Name Changed Successfully!");
+        setEditMode(false);
+        setTimeout(() => setChanged(""), 1000);
+      } else {
+        throw new Error("Failed to update profile");
+      }
+    } catch (e) {
+      console.log("Error updating details: " + e.message);
+    }
+  };
+
+  return (
+    <div className="profile-container">
+      <h2>Profile</h2>
+      <div>
+        <label>Name:</label>
+        {editMode ? (
+          <input
+            type="text"
+            value={nameInput}
+            onChange={(e) => setNameInput(e.target.value)}
+          />
+        ) : (
+          <span>{userName}</span>
+        )}
+      </div>
+      <div>
+        <label>Email:</label>
+        <span>{sessionStorage.getItem('email')}</span>
+      </div>
+      {changed && <div style={{ color: 'green' }}>{changed}</div>}
+      <div>
+        {editMode ? (
+          <button onClick={handleSubmit}>Save</button>
+        ) : (
+          <button onClick={() => setEditMode(true)}>Edit</button>
+        )}
+      </div>
+    </div>
+  );
 }
-};
-
-const handleEdit = () => {
-setEditMode(true);
-};
-
-const handleInputChange = (e) => {
-setUpdatedDetails({
-  ...updatedDetails,
-  [e.target.name]: e.target.value,
-});
-};
-const handleSubmit = async (e) => {
-  e.preventDefault();
-
-  try {
-    const authtoken = sessionStorage.getItem("auth-token");
-    const email = sessionStorage.getItem("email");
-
-    if (!authtoken || !email) {
-      navigate("/app/login");
-      return;
-    }
-
-    const payload = { ...updatedDetails };
-    const response = await fetch(`${urlConfig.backendUrl}/api/auth/update`, {
-      //Step 1: Task 1
-      //Step 1: Task 2
-      //Step 1: Task 3
-    });
-
-    if (response.ok) {
-      // Update the user details in session storage
-      //Step 1: Task 4
-      //Step 1: Task 5
-      setUserDetails(updatedDetails);
-      setEditMode(false);
-      // Display success message to the user
-      setChanged("Name Changed Successfully!");
-      setTimeout(() => {
-        setChanged("");
-        navigate("/");
-      }, 1000);
-
-    } else {
-      // Handle error case
-      throw new Error("Failed to update profile");
-    }
-  } catch (error) {
-    console.error(error);
-    // Handle error case
-  }
-};
-
-return (
-<div className="profile-container">
-  {editMode ? (
-<form onSubmit={handleSubmit}>
-<label>
-  Email
-  <input
-    type="email"
-    name="email"
-    value={userDetails.email}
-    disabled // Disable the email field
-  />
-</label>
-<label>
-   Name
-   <input
-     type="text"
-     name="name"
-     value={updatedDetails.name}
-     onChange={handleInputChange}
-   />
-</label>
-
-<button type="submit">Save</button>
-</form>
-) : (
-<div className="profile-details">
-<h1>Hi, {userDetails.name}</h1>
-<p> <b>Email:</b> {userDetails.email}</p>
-<button onClick={handleEdit}>Edit</button>
-<span style={{color:'green',height:'.5cm',display:'block',fontStyle:'italic',fontSize:'12px'}}>{changed}</span>
-</div>
-)}
-</div>
-);
-};
-
-export default Profile;
