@@ -1,36 +1,97 @@
-/* Style for image placeholder */
+/* Container */
+.details-container {
+    max-width: 900px;
+    margin: auto;
+    padding: 20px;
+}
+
+/* Card layout */
+.details-card {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* ============================
+   Image Placeholder (Task 1)
+============================ */
 .image-placeholder-large {
-    /* Task 1 styling */
-    {{insert code here}}
+    width: 100%;
+    height: 400px;
+    background-color: #e9ecef;
+    position: relative;
 }
 
-/* Style for product image */
+/* ============================
+   Product Image (Task 2)
+============================ */
 .product-image-large {
-    /* Task 2 styling */
-    {{insert code here}}
+    width: 100%;
+    height: 400px;
+    object-fit: cover;
+    border-radius: 6px;
+    margin-bottom: 20px;
 }
 
-/* Style for 'no image available' placeholder */
+/* ============================
+   No Image Available (Task 3)
+============================ */
 .no-image-available-large {
-    /* Task 3 styling */
-    {{insert code here}}
+    width: 100%;
+    height: 400px;
+    background-color: #e9ecef;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.3rem;
+    font-weight: 500;
+    color: #6c757d;
 }
 
-/* Style for card header */
+/* ============================
+   Card Header (Task 4)
+============================ */
 .card-header {
-    /* Task 4 styling */
-    {{insert code here}}
+    background-color: #0056b3;
+    color: white;
+    padding: 15px;
+    border-radius: 6px 6px 0 0;
+    font-size: 1.25rem;
+    font-weight: 600;
 }
 
-/* Style for details title */
+/* ============================
+   Details Title (Task 5)
+============================ */
 .details-title {
-    /* Task 5 styling */
-    {{insert code here}}
+    font-size: 1.8rem;
+    font-weight: bold;
+    color: #343a40;
+    margin-bottom: 15px;
 }
 
-/* Style for comments section */
+/* ============================
+   Comments Section (Task 6)
+============================ */
 .comments-section {
-    /* Task 6 styling */
-    {{insert code here}}
+    margin-top: 20px;
+    padding: 15px;
+    background-color: #f8f9fa;
+    border-radius: 6px;
 }
 
+/* Individual comment box */
+.comment-box {
+    background-color: #ffffff;
+    padding: 10px;
+    border-radius: 5px;
+    margin-bottom: 10px;
+    border: 1px solid #e0e0e0;
+}
+
+/* Error message */
+.error-message {
+    color: red;
+    text-align: center;
+}
