@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import urlConfig from "../config/urlConfig";
+import { urlConfig } from "../../config"; // ✅ Corrected import
 
 const SearchPage = () => {
   const navigate = useNavigate();
@@ -11,6 +11,8 @@ const SearchPage = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [ageRange, setAgeRange] = useState(6);
   const [searchResults, setSearchResults] = useState([]);
+
+  const bearerToken = sessionStorage.getItem('auth-token');
 
   // Example categories & conditions
   const categories = ["Toys", "Books", "Clothes", "Electronics"];
@@ -30,7 +32,13 @@ const SearchPage = () => {
     }).toString();
 
     try {
-      const response = await fetch(`${baseUrl}${queryParams}`);
+      const response = await fetch(`${baseUrl}${queryParams}`, {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: bearerToken ? `Bearer ${bearerToken}` : "",
+        },
+      });
+
       if (!response.ok) {
         throw new Error("Search failed");
       }
@@ -111,16 +119,16 @@ const SearchPage = () => {
         {searchResults.length > 0 ? (
           searchResults.map((product) => (
             <div key={product.id} className="card mb-3">
-              <img
-                src={product.image}
-                alt={product.name}
-                className="card-img-top"
-              />
+              {product.image && (
+                <img
+                  src={product.image}
+                  alt={product.name}
+                  className="card-img-top"
+                />
+              )}
               <div className="card-body">
                 <h5 className="card-title">{product.name}</h5>
-                <p className="card-text">
-                  {product.description.slice(0, 100)}...
-                </p>
+                <p className="card-text">{product.description.slice(0, 100)}...</p>
               </div>
               <div className="card-footer">
                 <button
