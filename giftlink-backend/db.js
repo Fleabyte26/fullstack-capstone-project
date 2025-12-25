@@ -1,35 +1,33 @@
-// giftlink-backend/db.js
+/// giftlink-backend/models/db.js
 const { MongoClient } = require('mongodb');
+const dotenv = require('dotenv');
+dotenv.config();
 
+const MONGO_URL = process.env.MONGO_URL;
+
+let cachedClient = null;
 let cachedDb = null;
 
-/**
- * Connects to MongoDB and returns the db instance.
- * Uses cached connection to improve performance.
- */
 async function connectToDatabase() {
-  if (cachedDb) return cachedDb;
+  if (cachedClient && cachedDb) {
+    return cachedDb;
+  }
 
   try {
-    // Use the environment variable from your .env file
-    const mongoUri = process.env.MONGO_URL;
-
-    if (!mongoUri) {
-      throw new Error('MONGO_URL is not defined in environment variables');
-    }
-
-    const client = await MongoClient.connect(mongoUri, {
+    const client = await MongoClient.connect(MONGO_URL, {
+      useNewUrlParser: true,
       useUnifiedTopology: true,
     });
 
-    const db = client.db('giftsdb'); // use giftsdb database
+    const db = client.db('giftsdb');
+    cachedClient = client;
     cachedDb = db;
-    console.log('Connected to MongoDB successfully');
+    console.log('Connected to MongoDB');
     return db;
-  } catch (error) {
-    console.error('Error connecting to MongoDB:', error.message);
-    throw error;
+  } catch (err) {
+    console.error('MongoDB connection error:', err);
+    throw err;
   }
 }
 
-module.exports = { connectToDatabase };
+module.exports = connectToDatabase;
